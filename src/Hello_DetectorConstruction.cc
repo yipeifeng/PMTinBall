@@ -1,5 +1,6 @@
 
 #include "Hello_DetectorConstruction.hh"
+#include "Hello_DetectorConstructionUtils.hh"
 
 #include "G4Material.hh"
 #include "G4Box.hh"
@@ -41,12 +42,17 @@ Hello_DetectorConstruction::Construct()
 void 
 Hello_DetectorConstruction::makeVariables()
 {
-  expHall_x = 1.0 * m;
-  expHall_y = 1.0 * m;
-  expHall_z = 1.0 * m;
+  expHall_x = 15.0 * m;
+  expHall_y = 15.0 * m;
+  expHall_z = 15.0 * m;
 
   pmttube_r = 50.8*cm / 2;
   pmttube_h = 68.5*cm;
+
+  ball_r = 10.0 * m;
+
+  gap = 10 * mm;
+
 }
 
 void
@@ -127,13 +133,36 @@ Hello_DetectorConstruction::makePMTLogical()
 G4VPhysicalVolume* 
 Hello_DetectorConstruction::makePMTPhysical()
 {
-  pmttube_phys = new G4PVPlacement(
-                                    0,
-                                    G4ThreeVector(),
+  G4int n_one_circle = Utils::Ball::GetMaxiumNumInCircle(
+                                                ball_r,
+                                                pmttube_r,
+                                                gap
+                                                        );
+  G4double per_phi = 2*pi / n_one_circle;
+  G4int copyno = 0;
+
+  for (G4int phi_i=0; phi_i < n_one_circle; ++phi_i) {
+
+    G4double phi = per_phi * phi_i;
+
+    G4double x = (pmttube_h/2 + ball_r) * cos(phi);
+    G4double y = (pmttube_h/2 + ball_r) * sin(phi);
+    G4double z = 0;
+
+    G4ThreeVector pos(x, y, z);
+    G4RotationMatrix rot;
+    rot.rotateY(pi * 1.5);
+    rot.rotateZ(phi);
+    G4Transform3D trans(rot, pos);
+
+    pmttube_phys = new G4PVPlacement(
+                                    trans,
                                     pmttube_log,
                                     "PMTTube",
                                     experimentalHall_log, 
                                     false, 
-                                    0); 
+                                    copyno); 
+    ++copyno;
+  }
 
 }

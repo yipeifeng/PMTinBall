@@ -42,6 +42,10 @@ class Hello_DetectorConstruction : public G4VUserDetectorConstruction
 
         G4double pmttube_r;
         G4double pmttube_h;
+
+        G4double ball_r;
+
+        G4double gap;
 };       
 
 #endif
