@@ -133,25 +133,47 @@ Hello_DetectorConstruction::makePMTLogical()
 G4VPhysicalVolume* 
 Hello_DetectorConstruction::makePMTPhysical()
 {
+  G4int copyno = 0;
+
+  // Calculate the PMT in r - theta
+  G4int n_x_z = Utils::Ball::GetMaxiumNumInCircle(
+                                                  ball_r,
+                                                  pmttube_r,
+                                                  gap);
+
+  G4int n_x_z_half = n_x_z / 2;
+
+  G4double per_theta = pi / n_x_z_half;
+
+  G4double theta = per_theta * n_x_z_half/2;
+
+  G4double small_theta = atan( pmttube_r / ball_r);
+
+  G4double ball_r_x_y = ball_r * sin(theta - small_theta);
+
+  // Calculate the r - phi
+  // TODO
+  // The gap is the gap between the small Rs.
+
   G4int n_one_circle = Utils::Ball::GetMaxiumNumInCircle(
-                                                ball_r,
+                                                ball_r_x_y,
                                                 pmttube_r,
                                                 gap
                                                         );
   G4double per_phi = 2*pi / n_one_circle;
-  G4int copyno = 0;
 
   for (G4int phi_i=0; phi_i < n_one_circle; ++phi_i) {
 
     G4double phi = per_phi * phi_i;
 
-    G4double x = (pmttube_h/2 + ball_r) * cos(phi);
-    G4double y = (pmttube_h/2 + ball_r) * sin(phi);
-    G4double z = 0;
+
+    G4double x = (pmttube_h/2 + ball_r) * sin(theta) * cos(phi);
+    G4double y = (pmttube_h/2 + ball_r) * sin(theta) * sin(phi);
+    G4double z = (pmttube_h/2 + ball_r) * cos(theta);
 
     G4ThreeVector pos(x, y, z);
     G4RotationMatrix rot;
-    rot.rotateY(pi * 1.5);
+    rot.rotateY(pi + theta);
     rot.rotateZ(phi);
     G4Transform3D trans(rot, pos);
 
