@@ -9,6 +9,10 @@
 #include "G4PVPlacement.hh"
 #include "globals.hh"
 
+#include "G4Colour.hh"
+#include "G4VisAttributes.hh"
+
+
 
 Hello_DetectorConstruction::Hello_DetectorConstruction()
 {
@@ -108,6 +112,14 @@ Hello_DetectorConstruction::makePMTLogical()
                                     Al/*Material*/, 
                                     "PMTTube_Logic");
 
+  G4VisAttributes* pmttube_visatt = new G4VisAttributes(G4Colour(0.5, 0.5, 0.5));
+  //pmttube_visatt -> SetForceWireframe(true);  
+  //pmttube_visatt -> SetForceAuxEdgeVisible(true);
+  pmttube_visatt -> SetForceSolid(true);
+  pmttube_visatt -> SetForceLineSegmentsPerCircle(4);
+
+  pmttube_log -> SetVisAttributes(pmttube_visatt);
+
   return pmttube_log;
 
 }
@@ -115,5 +127,13 @@ Hello_DetectorConstruction::makePMTLogical()
 G4VPhysicalVolume* 
 Hello_DetectorConstruction::makePMTPhysical()
 {
+  pmttube_phys = new G4PVPlacement(
+                                    0,
+                                    G4ThreeVector(),
+                                    pmttube_log,
+                                    "PMTTube",
+                                    experimentalHall_log, 
+                                    false, 
+                                    0); 
 
 }
