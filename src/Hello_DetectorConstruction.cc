@@ -145,22 +145,34 @@ Hello_DetectorConstruction::makePMTPhysical()
 
   G4double per_theta = pi / n_x_z_half;
 
-  G4double theta = per_theta * n_x_z_half/2;
+  //G4double theta = per_theta * n_x_z_half/2;
+  G4double theta = per_theta * 0;
 
   G4double small_theta = atan( pmttube_r / ball_r);
 
-  G4double ball_r_x_y = ball_r * sin(theta - small_theta);
+  G4int n_one_circle = 1;
+  G4double per_phi = 0;
 
-  // Calculate the r - phi
-  // TODO
-  // The gap is the gap between the small Rs.
+  if ( theta > small_theta ) {
 
-  G4int n_one_circle = Utils::Ball::GetMaxiumNumInCircle(
-                                                ball_r_x_y,
-                                                pmttube_r,
-                                                gap
-                                                        );
-  G4double per_phi = 2*pi / n_one_circle;
+    G4double ball_r_x_y = ball_r * sin(theta - small_theta);
+
+    // Calculate the r - phi
+    // TODO
+    // The gap is the gap between the small Rs.
+
+    n_one_circle = Utils::Ball::GetMaxiumNumInCircle(
+                                                  ball_r_x_y,
+                                                  pmttube_r,
+                                                  gap
+                                                          );
+    assert ( n_one_circle > 0 );
+    per_phi = 2*pi / n_one_circle;
+
+  } else {
+
+  }
+
 
   for (G4int phi_i=0; phi_i < n_one_circle; ++phi_i) {
 
