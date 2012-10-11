@@ -143,60 +143,84 @@ Hello_DetectorConstruction::makePMTPhysical()
 
   G4int n_x_z_half = n_x_z / 2;
 
+  G4int n_theta_one_circle = n_x_z_half;
+
   G4double per_theta = pi / n_x_z_half;
 
-  //G4double theta = per_theta * n_x_z_half/2;
-  G4double theta = per_theta * 0;
+  for (G4int theta_i = 0; theta_i < n_theta_one_circle; ++theta_i) {
+    //G4double theta = per_theta * n_x_z_half/2;
+    G4double theta = per_theta * theta_i;
 
-  G4double small_theta = atan( pmttube_r / ball_r);
+    G4double small_theta = atan( pmttube_r / ball_r);
 
-  G4int n_one_circle = 1;
-  G4double per_phi = 0;
+    G4cout << "Small theta: " << small_theta << G4endl;
+    G4cout << "Theta: " << theta << G4endl;
 
-  if ( theta > small_theta ) {
+    G4int n_one_circle = 1;
+    G4double per_phi = 0;
 
-    G4double ball_r_x_y = ball_r * sin(theta - small_theta);
+    assert ( (0 <= theta) && (theta <=pi) );
 
-    // Calculate the r - phi
-    // TODO
-    // The gap is the gap between the small Rs.
+    G4double theta_real=0;
 
-    n_one_circle = Utils::Ball::GetMaxiumNumInCircle(
-                                                  ball_r_x_y,
-                                                  pmttube_r,
-                                                  gap
-                                                          );
-    assert ( n_one_circle > 0 );
-    per_phi = 2*pi / n_one_circle;
-
-  } else {
-
-  }
+    if ( theta < pi/2 ) {
+      theta_real = theta - small_theta;
+    } else if (theta >= pi/2) {
+      theta_real = (pi - theta) - small_theta;
+    }
 
 
-  for (G4int phi_i=0; phi_i < n_one_circle; ++phi_i) {
+    if ( (theta_real > small_theta) ) {
 
-    G4double phi = per_phi * phi_i;
+      assert ( (0 <= theta) && (theta <=pi) );
+
+      G4cout << "Theta: " << theta_real << G4endl;
+
+      G4double ball_r_x_y = ball_r * sin(theta_real);
+
+      assert (ball_r_x_y >= 0 || printf("Ball_r_x_y: %g m\n", ball_r_x_y/m));
+
+      // Calculate the r - phi
+      // TODO
+      // The gap is the gap between the small Rs.
+
+      n_one_circle = Utils::Ball::GetMaxiumNumInCircle(
+                                                    ball_r_x_y,
+                                                    pmttube_r,
+                                                    gap
+                                                            );
+      assert ( n_one_circle > 0 );
+      per_phi = 2*pi / n_one_circle;
+
+    } else {
+
+    }
 
 
-    G4double x = (pmttube_h/2 + ball_r) * sin(theta) * cos(phi);
-    G4double y = (pmttube_h/2 + ball_r) * sin(theta) * sin(phi);
-    G4double z = (pmttube_h/2 + ball_r) * cos(theta);
+    for (G4int phi_i=0; phi_i < n_one_circle; ++phi_i) {
 
-    G4ThreeVector pos(x, y, z);
-    G4RotationMatrix rot;
-    rot.rotateY(pi + theta);
-    rot.rotateZ(phi);
-    G4Transform3D trans(rot, pos);
+      G4double phi = per_phi * phi_i;
 
-    pmttube_phys = new G4PVPlacement(
-                                    trans,
-                                    pmttube_log,
-                                    "PMTTube",
-                                    experimentalHall_log, 
-                                    false, 
-                                    copyno); 
-    ++copyno;
+
+      G4double x = (pmttube_h/2 + ball_r) * sin(theta) * cos(phi);
+      G4double y = (pmttube_h/2 + ball_r) * sin(theta) * sin(phi);
+      G4double z = (pmttube_h/2 + ball_r) * cos(theta);
+
+      G4ThreeVector pos(x, y, z);
+      G4RotationMatrix rot;
+      rot.rotateY(pi + theta);
+      rot.rotateZ(phi);
+      G4Transform3D trans(rot, pos);
+
+      pmttube_phys = new G4PVPlacement(
+                                      trans,
+                                      pmttube_log,
+                                      "PMTTube",
+                                      experimentalHall_log, 
+                                      false, 
+                                      copyno); 
+      ++copyno;
+    }
   }
 
 }
